@@ -123,7 +123,7 @@ class Node {
             if (!n.Texture || !n.Position || !n.visibility) return;
 
             let playerPos = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
-            let drawPos = MakeVector(playerPos.X + (n.Position.X + MapOffset.X) * scale, playerPos.Y + (n.Position.Y + MapOffset.Y));
+            let drawPos = MakeVector(playerPos.X + (n.Position.X + MapOffset.X) * scale, playerPos.Y + (n.Position.Y + MapOffset.Y) * scale);
 
             n.hovering = ButtonUtils.Hovering(n.Texture, drawPos, scale);
 
@@ -146,7 +146,7 @@ class Node {
         RegisteredNodes.forEach(n => {
             if (!n.Texture || !n.Position || !n.visibility) return;
 
-            let drawPos = MakeVector(playerPos.X + (n.Position.X + MapOffset.X) * scale, playerPos.Y + (n.Position.Y + MapOffset.Y));
+            let drawPos = MakeVector(playerPos.X + (n.Position.X + MapOffset.X) * scale, playerPos.Y + (n.Position.Y + MapOffset.Y) * scale);
             let origin = MakeVector(n.Texture.Width / 2, n.Texture.Height / 2);
             let highOrigin = MakeVector(n.HighlightTexture.Width / 2, n.HighlightTexture.Height / 2);
 
@@ -190,18 +190,19 @@ class Node {
 
 // Criação dos nodes
 Node.Create("Starter", 1, null, "Textures/DefaultIcon.png", MakeVector(0, 0));
+Node.Create("Begginer", 1, "Starter", "Textures/DefaultIcon.png", MakeVector(0, -60));
 let NodeMainButton = new NodeButton("Textures/DefaultIcon.png", MakeVector(200, 0));
 
 Main.DrawRain.hook((orig, self) => {
-    Node.MapControl();
-});
-
-Main.DrawInterface_12_IngameFancyUI.hook((orig, sf) => {
     Node.DrawNode();
+    Node.MapControl();
     NodeMainButton.Draw();
     Node.UpdateNode();
-    return orig(sf);
 });
+
+/*Main.DrawInterface_12_IngameFancyUI.hook((orig, sf) => {
+    return orig(sf);
+});*/
 
 Main.Initialize_AlmostEverything.hook((orig, self) => {
     orig(self);
