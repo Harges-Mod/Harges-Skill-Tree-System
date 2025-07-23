@@ -2,7 +2,7 @@ import { using } from "./ModClasses.js";
 using("Terraria", "Microsoft.Xna.Framework", "Microsoft.Xna.Framework.Graphics", "Terraria.GameInput");
 
 let RegisteredNodes = [];
-let level = 80;
+let level = 3;
 
 const MakeVector = (x, y) => {
     let v = Vector2.new();
@@ -87,7 +87,6 @@ class Node {
         this.Color = this.unlock ? Color.White : Color.Gray;
     }
 
-    // Only can be Update by @DrawRain
     static MapControl = () => {
         let currentMouse = MakeVector(Main.mouseX, Main.mouseY);
 
@@ -101,13 +100,12 @@ class Node {
         if (dragging) {
             let deltaX = currentMouse.X - lastMousePos.X;
             let deltaY = currentMouse.Y - lastMousePos.Y;
-            MapOffset.X += deltaX;
-            MapOffset.Y += deltaY;
+            MapOffset.X += deltaX * 0.5;
+            MapOffset.Y += deltaY * 0.5;
             lastMousePos = currentMouse;
         }
     };
 
-    // Only can be checked @DrawInterface_12_IngameFancyUI
     static NodeMouseLogic = () => {
         let mouseCentered = MakeVector((PlayerInput.MouseX - Main.screenWidth / 2) / (Main.screenWidth / 2), (PlayerInput.MouseY - Main.screenHeight / 2) / (Main.screenHeight / 2));
 
@@ -127,7 +125,7 @@ class Node {
 
             n.hovering = ButtonUtils.Hovering(n.Texture, drawPos, scale);
 
-            if (n.hovering && Main.mouseLeftRelease) {
+            if (n.hovering && Main.mouseLeftRelease && Main.mouseLeft) {
                 if (level >= n.minLevel && !n.unlock) {
                     level -= n.minLevel;
                     Node.UnlockNode(n.name);
@@ -136,6 +134,16 @@ class Node {
             }
 
             n.UpdateColor();
+        });
+    };
+
+    static DrawNodeBrackGround = () => {
+        RegisteredNodes.forEach(n => {
+            let playerPos = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
+            let origin = MakeVector(n.Texture.Width / 2, n.Texture.Height / 2);
+            Main.spriteBatch[
+                "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)"
+            ](n.Back, playerPos, null, Color.White, 0, origin, 50, SpriteEffects.None, 0.0);
         });
     };
 
@@ -173,6 +181,7 @@ class Node {
             RegisteredNodes.forEach(n => {
                 n.Texture = tl.texture.load(n.TexturePath);
                 n.HighlightTexture = tl.texture.load("Textures/DefaultIconHighlight.png");
+                // n.Back = tl.texture.load("Textures/Back.png");
             });
         } catch (e) {
             tl.log(e);
@@ -188,20 +197,40 @@ class Node {
     static GetNodeByName = name => RegisteredNodes.find(n => n.name === name);
 }
 
-// Criação dos nodes
+// Testing Nodes
 Node.Create("Starter", 1, null, "Textures/DefaultIcon.png", MakeVector(0, 0));
-Node.Create("Begginer", 1, "Starter", "Textures/DefaultIcon.png", MakeVector(0, -60));
+
+Node.Create("Begginer", 1, "Starter", "Textures/DefaultIcon.png", MakeVector(60, -30));
+
+Node.Create("Begginer2", 1, "Starter", "Textures/DefaultIcon.png", MakeVector(-60, -30));
+
+Node.Create("Experto", 1, "Starter", "Textures/DefaultIcon.png", MakeVector(0, -60));
+
 let NodeMainButton = new NodeButton("Textures/DefaultIcon.png", MakeVector(200, 0));
 
-Main.DrawRain.hook((orig, self) => {
+Main.DrawInfernoRings.hook((orig, sf) => {
+    orig(sf);
     Node.DrawNode();
     Node.MapControl();
     NodeMainButton.Draw();
     Node.UpdateNode();
 });
 
-/*Main.DrawInterface_12_IngameFancyUI.hook((orig, sf) => {
+/**
+// Draw in Screen and World Position Bizarre.
+Main.DrawLiquid.hook((orig, sf, bg, waterStyle, Alpha, drawSinglePassLiquids) => {
+    orig(sf, bg, waterStyle, Alpha, drawSinglePassLiquids);
+});
+// Exelent But Draw before DrawDust.
+Main.DrawGore.hook((orig, self) => {
+    // Node.DrawNodeBrackGround();
+});
+
+Main.DrawInterface_12_IngameFancyUI.hook((orig, sf) => {
     return orig(sf);
+});
+Main.DrawInterface.hook((orig, sf, gameTime) => {
+    orig(sf, gameTime);
 });*/
 
 Main.Initialize_AlmostEverything.hook((orig, self) => {
