@@ -66,8 +66,10 @@ class NodeButton extends Button {
         this.hovering = ButtonUtils.Hovering(this.Texture, drawPos, scale);
 
         if (this.hovering && Main.mouseLeftRelease && Main.mouseLeft) {
-            Main.NewText("Clicado", 100, 0, 0);
+          
+          
             if (Node.DrawState === Node.States.Nothing) {
+              Node.ResetMap()
                 Node.DrawState = Node.States.MapNode;
             } else {
                 Node.DrawState = Node.States.Nothing;
@@ -160,8 +162,18 @@ class Node {
             let playerPos = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
             let origin = MakeVector(n.Texture.Width / 2, n.Texture.Height / 2);
             Main.spriteBatch[
-                "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)"
-            ](n.Back, playerPos, null, Color.White, 0, origin, 50, SpriteEffects.None, 0.0);
+                "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)"
+            ](
+                GameContent.TextureAssets.MagicPixel.Value,
+                playerPos,
+                null,
+                Color.Lerp(Color.White, Color.Transparent, 0.5),
+                0,
+                origin,
+                MakeVector(Main.screenWidth, Main.screenHeight),
+                SpriteEffects.None,
+                0
+            );
         });
     };
     static drawLine = (start, end, color, thickness = 2) => {
