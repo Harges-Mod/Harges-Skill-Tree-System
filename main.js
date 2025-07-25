@@ -15,6 +15,7 @@ const MakeVector = (x, y) => {
 let MapOffset = MakeVector(0, 0);
 let dragging = false;
 let lastMousePos = MakeVector(0, 0);
+
 class ButtonUtils {
     /**
      * @param {Texture2D} texture
@@ -32,10 +33,55 @@ class ButtonUtils {
     }
 }
 
-class Button {
+class NodeUtils {
+    /**
+     */
+    static Category = {
+        Melee: 0,
+        Ranged: 1,
+        Magic: 2,
+        Summoner: 3,
+        Trowler: 4
+    };
+
+    /**
+     * @param {string} str
+     * @returns {boolean}
+     */
+    static IsCategory = str => str in NodeUtils.Category;
+}
+
+let ButtonSystem = [];
+
+/**
+
+@summary Generic Buttons DIFERENT of @Nodea
+*/
+export class Button {
     constructor(TexturePath, Position = Vector2.Zero) {
         this.TexturePath = TexturePath;
         this.Position = Position;
+        ButtonSystem.push(this);
+    }
+
+    static Add = cls => ButtonSystem.push(new cls());
+
+    Clicked() {}
+    OnHover() {}
+    Draw() {}
+
+    Update() {
+        try {
+            let playerPos = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
+
+            this.scale = Main.screenHeight / 246;
+            this.hovering = ButtonUtils.Hovering(this.Texture, MakeVector(playerPos.X + this.Position.X * this.scale, playerPos.Y + this.Position.Y * this.scale), this.scale);
+            if (this.hovering) this.OnHover();
+            if (this.hovering && Main.mouseLeftRelease && Main.mouseLeft) this.Clicked();
+            this.Draw();
+        } catch (e) {
+            tl.log(e);
+        }
     }
 
     LoadAssets() {
@@ -45,13 +91,20 @@ class Button {
             tl.log(e);
         }
     }
-
-    Draw() {}
 }
+
 class NodeButton extends Button {
-    constructor(TexturePath, Position) {
-        super(TexturePath, Position);
-        this.hovering = false;
+    constructor() {
+        super();
+        this.TexturePath = "Textures/DefaultIcon.png";
+        this.Position = MakeVector(0, 0);
+    }
+
+    OnHover() {}
+    Clicked() {
+        Node.ResetMap();
+        Main.NewText("Hover", 100, 0, 0);
+        Node.DrawState = !Node.DrawState;
     }
 
     Draw() {
@@ -63,27 +116,15 @@ class NodeButton extends Button {
         const drawPos = MakeVector(playerPos.X + this.Position.X * scale, playerPos.Y + this.Position.Y * scale);
         const origin = MakeVector(this.Texture.Width / 2, this.Texture.Height / 2);
 
-        this.hovering = ButtonUtils.Hovering(this.Texture, drawPos, scale);
-
-        if (this.hovering && Main.mouseLeftRelease && Main.mouseLeft) {
-          
-          
-            if (Node.DrawState === Node.States.Nothing) {
-              Node.ResetMap()
-                Node.DrawState = Node.States.MapNode;
-            } else {
-                Node.DrawState = Node.States.Nothing;
-            }
-        }
-
         Main.spriteBatch[
             "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)"
         ](this.Texture, drawPos, null, Color.White, 0, origin, scale, SpriteEffects.None, 0.0);
     }
 }
+Button.Add(NodeButton);
 
 class Node {
-    static DrawState = 0;
+    static DrawState = false;
     static States = {
         Nothing: 0,
         MapNode: 1
@@ -133,9 +174,9 @@ class Node {
             Main.NewText("Clicked", 100, 0, 0);
         }
 
-        /*Main.NewText("mouseCentered.x" + mouseCentered.X, 100, 0, 0);
-        Main.NewText("mouseCentered.y" + mouseCentered.Y, 100, 0, 0);
-        */
+        /*Main.NewText("mouseCentered.x" + mouseCentered.X, 100, 0, 0);  
+    Main.NewText("mouseCentered.y" + mouseCentered.Y, 100, 0, 0);  
+    */
         let scale = Main.screenHeight / 246;
         RegisteredNodes.forEach(n => {
             if (!n.Texture || !n.Position || !n.visibility) return;
@@ -156,26 +197,25 @@ class Node {
             n.UpdateColor();
         });
     };
-
     static DrawNodeBrackGround = () => {
-        RegisteredNodes.forEach(n => {
-            let playerPos = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
-            let origin = MakeVector(n.Texture.Width / 2, n.Texture.Height / 2);
-            Main.spriteBatch[
-                "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)"
-            ](
-                GameContent.TextureAssets.MagicPixel.Value,
-                playerPos,
-                null,
-                Color.Lerp(Color.White, Color.Transparent, 0.5),
-                0,
-                origin,
-                MakeVector(Main.screenWidth, Main.screenHeight),
-                SpriteEffects.None,
-                0
-            );
-        });
+        let screenCenter = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
+        let origin = MakeVector(0.5, 0.5); // Centraliza o pixel mágico
+
+        Main.spriteBatch[
+            "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)"
+        ](
+            GameContent.TextureAssets.MagicPixel.Value,
+            screenCenter,
+            null,
+            Color.Lerp(Color.Blue, Color.Transparent, 0.5), // Cor mais apropriada para fundo
+            0,
+            origin,
+            MakeVector(Main.screenWidth, Main.screenHeight),
+            SpriteEffects.None,
+            0
+        );
     };
+
     static drawLine = (start, end, color, thickness = 2) => {
         let direction = MakeVector(end.X - start.X, end.Y - start.Y);
         let length = Math.sqrt(direction.X * direction.X + direction.Y * direction.Y);
@@ -192,7 +232,7 @@ class Node {
         let scale = Main.screenHeight / 246;
         let playerPos = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
 
-        // 1. Desenhar links pai-filho com linha fina
+        // Draw Node Line
         RegisteredNodes.forEach(n => {
             if (!n.children || !n.Position || !n.visibility) return;
 
@@ -223,7 +263,7 @@ class Node {
             if (n.hovering) {
                 Main.spriteBatch[
                     "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)"
-                ](n.HighlightTexture, drawPos, null, n.Color, 0, highOrigin, scale, SpriteEffects.None, 0.0);
+                ](n.HighlightTexture, drawPos, null, Color.White, 0, highOrigin, scale, SpriteEffects.None, 0.0);
             }
         });
     };
@@ -268,51 +308,48 @@ class Node {
     static GetNodeByName = name => RegisteredNodes.find(n => n.name === name);
 }
 
-// Testing Nodes
-Node.Create("Starter", 1, null, "Textures/DefaultIcon.png", MakeVector(0, 0));
 
-Node.Create("Begginer", 1, "Starter", "Textures/DefaultIcon.png", MakeVector(60, -30));
-
-Node.Create("Begginer2", 1, "Starter", "Textures/DefaultIcon.png", MakeVector(-60, -30));
-
-Node.Create("Experto", 1, ["Begginer", "Begginer2"], "Textures/DefaultIcon.png", MakeVector(0, -60));
-
-let NodeMainButton = new NodeButton("Textures/DefaultIcon.png", MakeVector(200, 0));
+//Node.Create("Experto", 1, ["Begginer", "Begginer2"], "Textures/DefaultIcon.png", MakeVector(0, -60));
 
 Main.DrawInfernoRings.hook((orig, sf) => {
     orig(sf);
 
-    if (Node.DrawState == 1) {
+    if (Node.DrawState) {
         Node.DrawNodeBrackGround();
         Node.DrawNode();
         Node.MapControl();
         Node.UpdateNode();
     }
-    NodeMainButton.Draw();
+    ButtonSystem.forEach(b => {
+        b.Update();
+    });
 });
 
 Main.DrawInterface.hook((orig, sf, gameTime) => {
-    if (Node.DrawState == 0) orig(sf, gameTime);
+    if (!Node.DrawState) orig(sf, gameTime);
 });
 
 Main.Initialize_AlmostEverything.hook((orig, self) => {
     orig(self);
+
     Node.LoadAssets();
-    NodeMainButton.LoadAssets();
+    ButtonSystem.forEach(b => {
+        b.LoadAssets();
+    });
     Node.UpdateNodeVisibility();
 });
 
 /*
 // Draw in Screen and World Position Bizarre.
 Main.DrawLiquid.hook((orig, sf, bg, waterStyle, Alpha, drawSinglePassLiquids) => {
-    orig(sf, bg, waterStyle, Alpha, drawSinglePassLiquids);
+orig(sf, bg, waterStyle, Alpha, drawSinglePassLiquids);
 });
 // Exelent But Draw before DrawDust.
 Main.DrawGore.hook((orig, self) => {
 });
 
 Main.DrawInterface_12_IngameFancyUI.hook((orig, sf) => {
-    return orig(sf);
+return orig(sf);
 });
 
 **/
