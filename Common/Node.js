@@ -119,7 +119,6 @@ export default class Node {
         let scale = Main.screenHeight / 246;
         let playerPos = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
 
-        // Draw Node Line
         Node.RegisteredNodes.forEach(n => {
             if (!n.children || !n.Position || !n.visibility) return;
 
@@ -130,12 +129,10 @@ export default class Node {
 
                 let end = MakeVector(playerPos.X + (child.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (child.Position.Y + Node.MapOffset.Y) * scale);
 
-                // Aqui ajustamos a espessura para 0.3 pra linha fina
                 // Node.drawLine(start, end, Color.Gray, 0.3);
             });
         });
 
-        // 2. Desenhar os nodes normalmente
         Node.RegisteredNodes.forEach(n => {
             if (!n.Texture || !n.Position || !n.visibility) return;
 
@@ -165,7 +162,7 @@ export default class Node {
             Node.RegisteredNodes.forEach(n => {
                 n.Texture = tl.texture.load(n.TexturePath);
                 n.HighlightTexture = tl.texture.load("Textures/DefaultIconHighlight.png");
-                n.Back = tl.texture.load("Textures/Back.png");
+                // n.Back = tl.texture.load("Textures/Back.png");
             });
         } catch (e) {
             tl.log(e);
