@@ -1,4 +1,4 @@
-import { using } from './ModClasses.js';
+import { using } from '../ModClasses.js';
 
 using('Microsoft.Xna.Framework');
 using('Microsoft.Xna.Framework.Graphics');
