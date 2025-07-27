@@ -1,19 +1,18 @@
-import * as xna from "../Utilities/XnaUtils.js";
-import ButtonUtils from "../Utilities/ButtonUtils.js";
+
+import LoadNC from '../Utilities/LoadNC.js'
 import {using} from "../Utilities/ModClasses.js";
 
+LoadNC('Utilities')
 using("Terraria", "Microsoft.Xna.Framework", "Microsoft.Xna.Framework.Graphics", "Terraria.GameInput");
 
-
-let MakeVector = (x, y) => xna.vec2.instance(x, y);
 let level = 100
 
 export default class Node {
     static RegisteredNodes = [];
-    static MapOffset = MakeVector(0, 0)
+    static MapOffset = UVector2.instance(0, 0)
     static Dragging = false
-    static lastMousePos = MakeVector(0,0)
-    static currentMouse = MakeVector(0, 0)
+    static lastMousePos = UVector2.instance(0,0)
+    static currentMouse = UVector2.instance(0, 0)
     
     static DrawState = false;
     static States = {
@@ -37,10 +36,10 @@ export default class Node {
         this.Color = this.unlock ? Color.White : Color.Gray;
     }
 
-    static ResetMap = () => (Node.MapOffset = MakeVector(0, 0));
+    static ResetMap = () => (Node.MapOffset = UVector2.instance(0, 0));
 
     static MapControl = () => {
-        Node.currentMouse = MakeVector(Main.mouseX, Main.mouseY);
+        Node.currentMouse = UVector2.instance(Main.mouseX, Main.mouseY);
 
         if (Main.mouseLeft && !Node.Dragging) {
             Node.Dragging = true;
@@ -59,7 +58,7 @@ export default class Node {
     };
 
     static NodeMouseLogic = () => {
-        let mouseCentered = MakeVector((PlayerInput.MouseX - Main.screenWidth / 2) / (Main.screenWidth / 2), (PlayerInput.MouseY - Main.screenHeight / 2) / (Main.screenHeight / 2));
+        let mouseCentered = UVector2.instance((PlayerInput.MouseX - Main.screenWidth / 2) / (Main.screenWidth / 2), (PlayerInput.MouseY - Main.screenHeight / 2) / (Main.screenHeight / 2));
 
         /*Main.NewText("mouseCentered.x" + mouseCentered.X, 100, 0, 0);  
     Main.NewText("mouseCentered.y" + mouseCentered.Y, 100, 0, 0);  
@@ -68,8 +67,8 @@ export default class Node {
         Node.RegisteredNodes.forEach(n => {
             if (!n.Texture || !n.Position || !n.visibility) return;
 
-            let playerPos = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
-            let drawPos = MakeVector(playerPos.X + (n.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (n.Position.Y + Node.MapOffset.Y) * scale);
+            let playerPos = UVector2.instance(Main.screenWidth / 2, Main.screenHeight / 2);
+            let drawPos = UVector2.instance(playerPos.X + (n.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (n.Position.Y + Node.MapOffset.Y) * scale);
 
             n.hovering = ButtonUtils.Hovering(n.Texture, drawPos, scale);
 
@@ -85,8 +84,8 @@ export default class Node {
         });
     };
     static DrawNodeBrackGround = () => {
-        let screenCenter = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
-        let origin = MakeVector(0.5, 0.5); // Centraliza o pixel mágico
+        let screenCenter = UVector2.instance(Main.screenWidth / 2, Main.screenHeight / 2);
+        let origin = UVector2.instance(0.5, 0.5); // Centraliza o pixel mágico
 
         Main.spriteBatch[
             "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)"
@@ -97,18 +96,18 @@ export default class Node {
             Color.Lerp(Color.Blue, Color.Transparent, 0.5), // Cor mais apropriada para fundo
             0,
             origin,
-            MakeVector(Main.screenWidth, Main.screenHeight),
+            UVector2.instance(Main.screenWidth, Main.screenHeight),
             SpriteEffects.None,
             0
         );
     };
 
     static drawLine = (start, end, color, thickness = 2) => {
-        let direction = MakeVector(end.X - start.X, end.Y - start.Y);
+        let direction = UVector2.instance(end.X - start.X, end.Y - start.Y);
         let length = Math.sqrt(direction.X * direction.X + direction.Y * direction.Y);
         let rotation = Math.atan2(direction.Y, direction.X);
-        let origin = MakeVector(0, 0.5); // alinha ao centro vertical
-        let scale = MakeVector(thickness, length); // X = espessura, Y = comprimento
+        let origin = UVector2.instance(0, 0.5); // alinha ao centro vertical
+        let scale = UVector2.instance(thickness, length); // X = espessura, Y = comprimento
 
         Main.spriteBatch[
             "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)"
@@ -117,28 +116,29 @@ export default class Node {
 
     static DrawNode = () => {
         let scale = Main.screenHeight / 246;
-        let playerPos = MakeVector(Main.screenWidth / 2, Main.screenHeight / 2);
+        let playerPos = UVector2.instance(Main.screenWidth / 2, Main.screenHeight / 2);
 
+        // Draw Node Line
         Node.RegisteredNodes.forEach(n => {
             if (!n.children || !n.Position || !n.visibility) return;
 
-            let start = MakeVector(playerPos.X + (n.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (n.Position.Y + Node.MapOffset.Y) * scale);
+            let start = UVector2.instance(playerPos.X + (n.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (n.Position.Y + Node.MapOffset.Y) * scale);
 
             n.children.forEach(child => {
                 if (!child || !child.Position || !child.visibility) return;
 
-                let end = MakeVector(playerPos.X + (child.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (child.Position.Y + Node.MapOffset.Y) * scale);
+                let end = UVector2.instance(playerPos.X + (child.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (child.Position.Y + Node.MapOffset.Y) * scale);
 
                 // Node.drawLine(start, end, Color.Gray, 0.3);
             });
         });
-
+        
         Node.RegisteredNodes.forEach(n => {
             if (!n.Texture || !n.Position || !n.visibility) return;
 
-            let drawPos = MakeVector(playerPos.X + (n.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (n.Position.Y + Node.MapOffset.Y) * scale);
-            let origin = MakeVector(n.Texture.Width / 2, n.Texture.Height / 2);
-            let highOrigin = MakeVector(n.HighlightTexture.Width / 2, n.HighlightTexture.Height / 2);
+            let drawPos = UVector2.instance(playerPos.X + (n.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (n.Position.Y + Node.MapOffset.Y) * scale);
+            let origin = UVector2.instance(n.Texture.Width / 2, n.Texture.Height / 2);
+            let highOrigin = UVector2.instance(n.HighlightTexture.Width / 2, n.HighlightTexture.Height / 2);
 
             Main.spriteBatch[
                 "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)"
