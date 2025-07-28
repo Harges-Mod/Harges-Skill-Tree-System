@@ -14,6 +14,7 @@ export class color {
 		return c
 	};
 	
+	
 	/*
   HEX: RRGGBB
   BINARY: RRRRRRRR GGGGGGGG BBBBBBBB
@@ -22,5 +23,8 @@ export class color {
   value & 255   = GGGGGGGG           = (G)
   n & 255       = BBBBBBBB           = (B)
 */
-	static hexToRgb = h => (n = parseInt(h.replace('#',''), 16)) => color.instance(n >> 16,(n >> 8) & 255,n & 255);
+		static hexToRgb = (h) => {
+		let n = parseInt(h.replace('#', ''), 16);
+		return color.instance(n >> 16, (n >> 8) & 255, n & 255, 255);
+		}
 }
