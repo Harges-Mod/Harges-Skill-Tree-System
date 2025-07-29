@@ -1,6 +1,5 @@
-
-import LoadNC from '../Utilities/LoadNC.js'
 import {using} from "../Utilities/ModClasses.js";
+import LoadNC from '../Utilities/LoadNC.js'
 
 LoadNC('Utilities')
 using("Terraria", "Microsoft.Xna.Framework", "Microsoft.Xna.Framework.Graphics", "Terraria.GameInput");
@@ -102,23 +101,32 @@ export default class Node {
         );
     };
 
-    static drawLine = (start, end, color, thickness = 2) => {
-        let direction = UVector2.instance(end.X - start.X, end.Y - start.Y);
-        let length = Math.sqrt(direction.X * direction.X + direction.Y * direction.Y);
-        let rotation = Math.atan2(direction.Y, direction.X);
-        let origin = UVector2.instance(0, 0.5); // alinha ao centro vertical
-        let scale = UVector2.instance(thickness, length); // X = espessura, Y = comprimento
+    static drawLine(start, target, color, thickness) {
+    let direction = UVector2.instance(target.X - start.X, target.Y - start.Y);
+    let length = Math.sqrt(direction.X * direction.X + direction.Y * direction.Y);
+    let rotation = Math.atan2(direction.Y, direction.X);
+    let origin = UVector2.instance(0, 0.5);
+    let scale = UVector2.instance(length, thickness * 0.001);
 
-        Main.spriteBatch[
-            "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)"
-        ](GameContent.TextureAssets.MagicPixel.Value, start, null, color, rotation, origin, scale, SpriteEffects.None, 0);
-    };
+    Main.spriteBatch[
+        "void Draw(Texture2D texture, Vector2 position, Nullable`1 sourceRectangle, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)"
+    ](
+        GameContent.TextureAssets.MagicPixel.Value,
+        start,
+        null,
+        color,
+        rotation,
+        origin,
+        scale,
+        SpriteEffects.None,
+        0
+    );
+}
 
     static DrawNode = () => {
         let scale = Main.screenHeight / 246;
         let playerPos = UVector2.instance(Main.screenWidth / 2, Main.screenHeight / 2);
 
-        // Draw Node Line
         Node.RegisteredNodes.forEach(n => {
             if (!n.children || !n.Position || !n.visibility) return;
 
@@ -129,10 +137,10 @@ export default class Node {
 
                 let end = UVector2.instance(playerPos.X + (child.Position.X + Node.MapOffset.X) * scale, playerPos.Y + (child.Position.Y + Node.MapOffset.Y) * scale);
 
-                // Node.drawLine(start, end, Color.Gray, 0.3);
+                Node.drawLine(start, end, UColor.hexToRgb('#204fa8'), 2);
             });
         });
-        
+
         Node.RegisteredNodes.forEach(n => {
             if (!n.Texture || !n.Position || !n.visibility) return;
 
