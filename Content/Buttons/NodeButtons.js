@@ -1,6 +1,6 @@
 import * as xna from '../../Utilities/XnaUtils.js'
 import Button from '../../Common/ModButton.js'
-import Node from '../../Common/Node.js'
+import Node from '../../Common/SkillTree/Node.js'
 import {using} from '../../Utilities/ModClasses.js'
 
 using('Terraria')
