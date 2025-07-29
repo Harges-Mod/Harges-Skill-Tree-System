@@ -1,4 +1,4 @@
-import Node from "../Common/Node.js";
+import Node from "../Common/SkillTree/Node.js";
 import LoadNC from "../Utilities/LoadNC.js";
 
 LoadNC('Utilities')
