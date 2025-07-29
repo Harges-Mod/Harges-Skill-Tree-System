@@ -8,7 +8,7 @@ let MakeVector = (x, y) => UVector2.instance(x, y);
 
 Node.Create(
     "Starter",
-    NodeReq.Create(1, [1]),
+    NodeReq.Create(1, [0]),
     null,
     "Textures/DefaultIcon.png",
     MakeVector(0, 0)
@@ -46,7 +46,7 @@ Node.Create(
     MakeVector(60, 0)
 );
 
-Node.Create(
+/*Node.Create(
     "Boats",
     NodeReq.Create(2),
     ["Mage", "Begginer"],
@@ -61,3 +61,4 @@ Node.Create(
     "Textures/DefaultIcon.png",
     MakeVector(60, -60)
 );
+*/
