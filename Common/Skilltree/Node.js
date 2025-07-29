@@ -89,7 +89,7 @@ let hasItems = () => {
         }
 
         if (!hasItems()) {
-            return Main.NewText("Cannot unlock missing items", 100, 0, 0);
+            return //Main.NewText("Cannot unlock missing items", 100, 0, 0);
         }
 
         PlayerInv.forEach(item => {
@@ -102,6 +102,7 @@ let hasItems = () => {
         level -= LevelOfNode;
         Node.UnlockNode(node.name);
     };
+    
     static NodeMouseLogic = () => {
         let mouseCentered = UVector2.instance(
             (PlayerInput.MouseX - Main.screenWidth / 2) /
