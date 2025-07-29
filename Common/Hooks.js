@@ -1,6 +1,6 @@
 import ModSystem from './ModSystem.js'
 import ModButton from './ModButton.js'
-import Node from './Node.js'
+import Node from './SkillTree/Node.js'
 
 import {using} from '../Utilities/ModClasses.js'
 
