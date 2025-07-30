@@ -14,8 +14,10 @@ Main.DrawInfernoRings.hook((orig, sf) => {
     if (Node.DrawState) {
         Node.DrawNodeBrackGround();
         Node.DrawNode();
+        Node.DrawRequisits()
         Node.MapControl();
         Node.UpdateNode();
+        
     }
     
     ModButton.AddHook('Update')
